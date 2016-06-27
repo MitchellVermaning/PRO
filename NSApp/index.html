@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html ng-app="TrainStationApp">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1"/>
+    <title>Mitchell Vermaning - NS App</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
+          integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/default.css">
+    <link href='https://fonts.googleapis.com/css?family=Roboto+Condensed' rel='stylesheet' type='text/css'>
+</head>
+<body>
+
+<div class="stationsList" ng-controller="TrainStationController as stations">
+    <div class="row">
+        <div class="col-md-3">
+            <h1>NS APP - Zoek jouw station</h1>
+            <h2>Andere kleur marker, klik <a href="index.html">hier</a>.</h2>
+
+            <!-- Laat de lengte zien van de lijst. Er als iets opgezocht wordt, word de lengte bijgewerkt -->
+            <div class="stationsList">
+                <div>Er zijn {{filteredStations.length}} stations in deze lijst</div>
+                <input type="text" placeholder="Doorzoek de lijst" ng-model="stations.searchQuery" autofocus>
+
+                <!-- Laat alle treinstations zien in een lijst -->
+                <nav>
+                    <ul>
+                        <div class="ownLocation-row animatedCSS"
+                             ng-class="{active:stations.currentStation=='currentLocation'}"
+                             ng-click="stations.setLocationOnMap()">
+                            - Mijn locatie -
+                        </div>
+                        <div class="trainList-row animatedCSS"
+                             ng-class="{active:stations.currentStation==currentStation}"
+                             ng-click="stations.setStation(currentStation)"
+                             ng-repeat="currentStation in stations.allStations | filter:stations.searchQuery as filteredStations">
+                            {{currentStation.name}}
+                        </div>
+                    </ul>
+                </nav>
+            </div>
+
+            <!-- Kijk of er in het menu op een treinstation geklikt is, zoja.. laat deze dan zien in het informatie venster -->
+            <div ng-switch on="stations.currentStation">
+                <div ng-switch-when="currentLocation">
+                    <div class="trainDetails animatedCSS" ng-if="stations.currentStation">
+                        <p>Dit is jouw huidige locatie{{stations.currentLocation.name}}</p>
+                    </div>
+                </div>
+                <div ng-switch-default>
+                    <div class="trainDetails animatedCSS" ng-if="stations.currentStation">
+                        <p>Het geselecteerde station is: {{stations.currentStation.name}} |
+                            {{stations.currentStation.type}}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-9">
+            <!-- Geef de Google Maps kaart weer op het scherm -->
+            <ui-gmap-google-map center='stations.map.center' zoom='stations.map.zoom' refresh="true" draggable="true"
+                                options="stations.map.options">
+
+                <!-- Haal alle coördinaten op van de stations en geef deze weer op de kaart.
+                Als icon wordt er elke keer dat je de pagina vernieuwd, een willekeurige kleur getoond -->
+                <ui-gmap-markers models="filteredStations"
+                                 coords="'self'"
+                                 icon='{url:"lib/randomColor.php"}'
+                                 idKey="'uic'"
+                                 fit="stations.allStations.length < 398 || filteredStations.length < 10"
+                                 click="stations.clickOnPinToMap(latitude,longitude)">
+                </ui-gmap-markers>
+            </ui-gmap-google-map>
+
+        </div>
+    </div>
+</div>
+
+<!-- Haal alle javascript bestanden op -->
+<script src='lib/lodash.js'></script>
+<script src="node_modules/angular/angular.js"></script>
+<script src="node_modules/angular-animate/angular-animate.js"></script>
+<script src='lib/angular-simple-logger.js'></script>
+<script src='lib/angular-google-maps.js'></script>
+<script src='https://maps.googleapis.com/maps/api/js?sensor=false'></script>
+<script src="app/app.js"></script>
+<script src="app/services/trainstation.service.js"></script>
+<script src="app/controllers/trainstation.controller.js"></script>
+
+</body>
+</html>
